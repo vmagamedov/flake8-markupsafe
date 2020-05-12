@@ -52,8 +52,11 @@ def main():
         for dirpath, dirnames, filenames in os.walk(namespace.path):
             for filename in filenames:
                 if filename.endswith(".mako"):
-                    failed = failed or _mako_file_check(
-                        os.path.join(dirpath, filename), namespace.show_source
+                    failed = (
+                        _mako_file_check(
+                            os.path.join(dirpath, filename), namespace.show_source
+                        )
+                        or failed
                     )
     elif os.path.isfile(namespace.path):
         failed = _mako_file_check(namespace.path, namespace.show_source)

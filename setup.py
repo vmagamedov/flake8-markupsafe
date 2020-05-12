@@ -19,6 +19,6 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     entry_points={
-        "flake8.extension": ["MS = flake8_markupsafe.plugin:MarkupSafePlugin",],
+        "flake8.extension": ["MS = flake8_markupsafe.plugin:MarkupSafePlugin"],
     },
 )

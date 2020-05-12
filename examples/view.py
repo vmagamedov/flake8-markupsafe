@@ -1,30 +1,18 @@
-import markupsafe
+from gettext import gettext
 from markupsafe import Markup
 
 
-def valid(value):
+def safe(value):
     return Markup("<script>{}</script>").format(value)
 
 
-def valid_multiline(value):
-    return Markup(
-        """
-        <script>{}</script>
-        """
-    ).format(value)
+def safe_i18n(value):
+    return Markup(gettext("<script>{}</script>")).format(value)
 
 
-def dangerous_format_old(value):
-    return Markup("<script>%s</script>" % value)
-
-
-def dangerous_format_new(value):
+def unsafe(value):
     return Markup("<script>{}</script>".format(value))
 
 
-def dangerous_fstring(value):
-    return Markup(f"<script>{value}</script>")
-
-
-def dangerous_as_attr(value):
-    return markupsafe.Markup(f"<script>{value}</script>")
+def unsafe_i18n(value):
+    return Markup(gettext("<script>{}</script>".format(value)))

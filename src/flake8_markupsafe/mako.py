@@ -1,5 +1,8 @@
 import os
+import sys
+import codecs
 import argparse
+import textwrap
 
 from mako import pyparser
 from mako.lexer import Lexer
@@ -11,18 +14,18 @@ class MakoVisitor:
     def __init__(self):
         self.locations = []
 
-    def visitExpression(self, node):
-        expr = pyparser.parse(node.code.code.lstrip())
-        visitor = PythonVisitor(node.lineno, node.pos)
+    def visitCode(self, node):
+        expr = pyparser.parse(textwrap.dedent(node.code.code))
+        visitor = PythonVisitor(node.lineno - 1, node.pos)
         visitor.visit(expr)
         self.locations.extend(visitor.locations)
 
-    def visitCode(self, node):
-        self.visitExpression(node)
+    def visitExpression(self, node):
+        self.visitCode(node)
 
 
-def _mako_file_check(filename):
-    with open(filename, "rb") as f:
+def _mako_file_check(filename, show_source):
+    with codecs.open(filename, "rb", "utf-8") as f:
         text = f.read()
     lexer = Lexer(text, filename)
     visitor = MakoVisitor()
@@ -31,19 +34,35 @@ def _mako_file_check(filename):
     if visitor.locations:
         text_lines = text.splitlines()
         for line, _ in visitor.locations:
-            if not text_lines[line - 1].endswith(b"# noqa"):
+            if not text_lines[line - 1].endswith("# noqa"):
                 print(f"{filename}:{line}")
+                if show_source:
+                    print(f"    {text_lines[line - 1].lstrip()}")
+    return bool(visitor.locations)
 
 
-def _main():
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("path")
+    parser.add_argument("--show-source", action="store_true")
     namespace = parser.parse_args()
-    for dirpath, dirnames, filenames in os.walk(namespace.path):
-        for filename in filenames:
-            if filename.endswith(".mako"):
-                _mako_file_check(os.path.join(dirpath, filename))
+
+    failed = False
+    if os.path.isdir(namespace.path):
+        for dirpath, dirnames, filenames in os.walk(namespace.path):
+            for filename in filenames:
+                if filename.endswith(".mako"):
+                    failed = failed or _mako_file_check(
+                        os.path.join(dirpath, filename), namespace.show_source
+                    )
+    elif os.path.isfile(namespace.path):
+        failed = _mako_file_check(namespace.path, namespace.show_source)
+    else:
+        print(f"Wrong files path: {namespace.path}", file=sys.stderr)
+        sys.exit(2)
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    _main()
+    main()

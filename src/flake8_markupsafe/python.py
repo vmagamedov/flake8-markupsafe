@@ -25,19 +25,13 @@ def _arg_safe(arg):
     elif (
         isinstance(arg, ast.Call) and _named_call(arg) and _is_i18n(_callable_name(arg))
     ):
-        return _args_safe(arg.args)
+        if len(arg.args) == 1:
+            return isinstance(arg.args[0], ast.Str)
+        else:
+            # last argument is a number for a plural form
+            return all(isinstance(a, ast.Str) for a in arg.args[:-1])
     else:
         return False
-
-
-def _args_safe(args):
-    if len(args) == 1:
-        return _arg_safe(args[0])
-    elif len(args) in (3, 4):
-        # last argument is a number for a ngettext-like function
-        return all(_arg_safe(arg) for arg in args[:-1])
-    else:
-        raise ValueError("Wrong number of arguments")
 
 
 class PythonVisitor(ast.NodeVisitor):
@@ -47,10 +41,13 @@ class PythonVisitor(ast.NodeVisitor):
         self.locations: List[Tuple[int, int]] = []
 
     def visit_Call(self, node: ast.Call):
-        if _named_call(node) and _callable_name(node) in {"Markup", "literal"}:
-            assert len(node.args) == 1, ast.dump(node)
+        if (
+            _named_call(node)
+            and _callable_name(node) in {"Markup", "literal"}
+            and node.args
+        ):
             if not _arg_safe(node.args[0]):
                 self.locations.append(
-                    (self.line + node.lineno, self.column + node.col_offset)
+                    (self.line + node.lineno, self.column + node.col_offset,)
                 )
         self.generic_visit(node)

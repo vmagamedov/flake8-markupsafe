@@ -24,6 +24,13 @@ def test_safe(code):
     assert not check(code)
 
 
+def test_empty(code):
+    """
+    Markup()
+    """
+    assert not check(code)
+
+
 def test_unsafe(code):
     """
     Markup("<script>{}</script>".format(value))

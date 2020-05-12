@@ -2,6 +2,9 @@ import ast
 from typing import Tuple, List
 
 
+_SCALARS = (ast.Str, ast.Num, ast.NameConstant)
+
+
 def _named_call(call):
     return isinstance(call.func, ast.Name) or isinstance(call.func, ast.Attribute)
 
@@ -20,7 +23,8 @@ def _is_i18n(name):
 
 
 def _arg_safe(arg):
-    if isinstance(arg, ast.Str):
+    # special case for sqlalchemy:literal(1)
+    if isinstance(arg, _SCALARS):
         return True
     elif (
         isinstance(arg, ast.Call) and _named_call(arg) and _is_i18n(_callable_name(arg))

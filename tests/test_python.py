@@ -24,6 +24,11 @@ def test_safe(code):
     assert not check(code)
 
 
+@pytest.mark.parametrize("argument", ["1", "1.1", "True", "False", "None"])
+def test_scalars(argument):
+    assert not check(ast.parse(f"literal({argument})"))
+
+
 def test_empty(code):
     """
     Markup()
@@ -76,6 +81,13 @@ def test_gettext_safe(code):
 def test_gettext_unsafe(code):
     """
     Markup(gettext("<script>{}</script>".format(value)))
+    """
+    assert check(code)
+
+
+def test_gettext_unsafe2(code):
+    """
+    Markup(gettext("<script>{}</script>").format(value))
     """
     assert check(code)
 

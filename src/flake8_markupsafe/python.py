@@ -19,7 +19,7 @@ def _callable_name(call):
 
 
 def _is_i18n(name):
-    return name in {"_", "N_"} or name.endswith("gettext")
+    return name == "_" or name.endswith("gettext")
 
 
 def _arg_safe(arg):

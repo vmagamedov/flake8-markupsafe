@@ -54,6 +54,7 @@ Note: Mako should be installed to use this feature.
       unsafe = Markup('<script>{}</script>'.format(value))
   examples/view.mako:8
       <div class="unsafe">${Markup('<script>{}</script>'.format(value))}</div>
+  Found 2 errors in 1 file
 
 Known to be safe
 ~~~~~~~~~~~~~~~~

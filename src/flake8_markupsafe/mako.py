@@ -3,6 +3,7 @@ import sys
 import codecs
 import argparse
 import textwrap
+from gettext import ngettext
 
 from mako import pyparser
 from mako.lexer import Lexer
@@ -31,6 +32,7 @@ def _mako_file_check(filename, show_source):
     visitor = MakoVisitor()
     node = lexer.parse()
     node.accept_visitor(visitor)
+    count = 0
     if visitor.locations:
         text_lines = text.splitlines()
         for line, _ in visitor.locations:
@@ -38,7 +40,8 @@ def _mako_file_check(filename, show_source):
                 print(f"{filename}:{line}")
                 if show_source:
                     print(f"    {text_lines[line - 1].lstrip()}")
-    return bool(visitor.locations)
+                count += 1
+    return count
 
 
 def main():
@@ -47,24 +50,36 @@ def main():
     parser.add_argument("--show-source", action="store_true")
     namespace = parser.parse_args()
 
-    failed = False
+    errors_count = 0
+    files_count = 0
     if os.path.isdir(namespace.path):
         for dirpath, dirnames, filenames in os.walk(namespace.path):
             for filename in filenames:
                 if filename.endswith(".mako"):
-                    failed = (
-                        _mako_file_check(
-                            os.path.join(dirpath, filename), namespace.show_source
-                        )
-                        or failed
+                    count = _mako_file_check(
+                        os.path.join(dirpath, filename), namespace.show_source
                     )
+                    if count:
+                        errors_count += count
+                        files_count += 1
     elif os.path.isfile(namespace.path):
-        failed = _mako_file_check(namespace.path, namespace.show_source)
+        count = _mako_file_check(namespace.path, namespace.show_source)
+        if count:
+            errors_count += count
+            files_count += 1
     else:
         print(f"Wrong files path: {namespace.path}", file=sys.stderr)
         sys.exit(2)
-    if failed:
+
+    if errors_count:
+        print(
+            f"Found {errors_count} {ngettext('error', 'errors', errors_count)}"
+            f" in {files_count} {ngettext('file', 'files', files_count)}",
+            file=sys.stderr,
+        )
         sys.exit(1)
+    else:
+        print("No errors found", file=sys.stderr)
 
 
 if __name__ == "__main__":

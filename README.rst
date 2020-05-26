@@ -72,6 +72,11 @@ Here is how to ignore errors in a Mako templates:
   <%
       title = Markup(page.title)  # noqa
   %>
+  <script type="text/javascript">
+      ${Markup(application_js)} <%doc>noqa</%doc>
+  </script>
+
+But it is better to pass into templates already wrapped into ``Markup`` objects.
 
 .. _Flake8: https://flake8.pycqa.org/
 .. _MarkupSafe: https://markupsafe.palletsprojects.com/

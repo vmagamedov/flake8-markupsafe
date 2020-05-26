@@ -6,4 +6,5 @@
 <div>
     <div class="safe">${Markup('<script>{}</script>').format(value)}</div>
     <div class="unsafe">${Markup('<script>{}</script>'.format(value))}</div>
+    <div class="ignored">${Markup('<script>{}</script>'.format(value))}</div><%doc>noqa</%doc>
 </div>

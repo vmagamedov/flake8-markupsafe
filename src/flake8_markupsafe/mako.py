@@ -36,7 +36,7 @@ def _mako_file_check(filename, show_source):
     if visitor.locations:
         text_lines = text.splitlines()
         for line, _ in visitor.locations:
-            if not text_lines[line - 1].endswith("# noqa"):
+            if not text_lines[line - 1].endswith(("# noqa", "<%doc>noqa</%doc>")):
                 print(f"{filename}:{line}")
                 if show_source:
                     print(f"    {text_lines[line - 1].lstrip()}")

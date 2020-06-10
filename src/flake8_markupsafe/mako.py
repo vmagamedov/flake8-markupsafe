@@ -22,7 +22,15 @@ class MakoVisitor:
         self.locations.extend(visitor.locations)
 
     def visitExpression(self, node):
-        self.visitCode(node)
+        if 'n' in node.escapes_code.args:
+            # simulate unsafe code to reuse PythonVisitor logic
+            code = 'Markup({})'.format(node.code.code)
+        else:
+            code = node.code.code
+        expr = pyparser.parse(code)
+        visitor = PythonVisitor(node.lineno - 1, node.pos)
+        visitor.visit(expr)
+        self.locations.extend(visitor.locations)
 
 
 def _mako_file_check(filename, show_source):

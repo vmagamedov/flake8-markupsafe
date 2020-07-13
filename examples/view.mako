@@ -2,6 +2,7 @@
     safe = Markup('<script>{}</script>').format(value)
     unsafe = Markup('<script>{}</script>'.format(value))
     ignored = Markup('<script>{}</script>'.format(value))  # noqa
+    safe_capture = Markup(capture(some_def, value))
 %>
 <div>
     <div class="safe">${Markup('<script>{}</script>').format(value)}</div>

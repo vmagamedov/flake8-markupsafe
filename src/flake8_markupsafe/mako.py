@@ -22,9 +22,9 @@ class MakoVisitor:
         self.locations.extend(visitor.locations)
 
     def visitExpression(self, node):
-        if 'n' in node.escapes_code.args:
+        if "n" in node.escapes_code.args:
             # simulate unsafe code to reuse PythonVisitor logic
-            code = 'Markup({})'.format(node.code.code)
+            code = "Markup({})".format(node.code.code)
         else:
             code = node.code.code
         expr = pyparser.parse(code)
